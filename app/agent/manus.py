@@ -15,13 +15,20 @@ from app.tool.python_execute import PythonExecute
 from app.tool.str_replace_editor import StrReplaceEditor
 
 
+def _get_safe_workspace_path() -> str:
+    """Get workspace path with proper encoding handling."""
+    path_str = str(config.workspace_root)
+    # Handle surrogate characters that can cause encoding issues
+    return path_str.encode('utf-8', errors='surrogateescape').decode('utf-8', errors='replace')
+
+
 class Manus(ToolCallAgent):
     """A versatile general-purpose agent with support for both local and MCP tools."""
 
     name: str = "Manus"
     description: str = "A versatile agent that can solve various tasks using multiple tools including MCP-based tools"
 
-    system_prompt: str = SYSTEM_PROMPT.format(directory=config.workspace_root)
+    system_prompt: str = SYSTEM_PROMPT.format(directory=_get_safe_workspace_path())
     next_step_prompt: str = NEXT_STEP_PROMPT
 
     max_observe: int = 10000

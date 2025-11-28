@@ -264,6 +264,14 @@ class LLM:
         return "Token limit exceeded"
 
     @staticmethod
+    def _sanitize_string(text: str) -> str:
+        """Sanitize string to handle encoding issues with surrogate characters."""
+        if not isinstance(text, str):
+            return text
+        # Handle surrogate characters that can cause UTF-8 encoding issues
+        return text.encode('utf-8', errors='surrogateescape').decode('utf-8', errors='replace')
+
+    @staticmethod
     def format_messages(
         messages: List[Union[dict, Message]], supports_images: bool = False
     ) -> List[dict]:
@@ -301,6 +309,10 @@ class LLM:
                 if "role" not in message:
                     raise ValueError("Message dict must contain 'role' field")
 
+                # Sanitize string content to handle encoding issues
+                if isinstance(message.get("content"), str):
+                    message["content"] = LLM._sanitize_string(message["content"])
+
                 # Process base64 images if present and model supports images
                 if supports_images and message.get("base64_image"):
                     # Initialize or convert content to appropriate format
@@ -314,7 +326,7 @@ class LLM:
                         # Convert string items to proper text objects
                         message["content"] = [
                             (
-                                {"type": "text", "text": item}
+                                {"type": "text", "text": LLM._sanitize_string(item) if isinstance(item, str) else item}
                                 if isinstance(item, str)
                                 else item
                             )

@@ -50,7 +50,7 @@ cd OpenManus
 3. Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 ### Method 2: Using uv (Recommended)
